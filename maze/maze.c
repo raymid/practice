@@ -10,11 +10,20 @@ int room_size;
 
 
 int cangoLeft(int x, int y) {
-
-   if (
-
+   return (y>1 && ver[x-1][y-2]==0);
 }
 
+int cangoUp(int x, int y) {
+	return (x>1 && hor[y-1][x-2]==0);
+}
+
+int cangoDown(int x, int y) {
+	return (x<room_size && hor[y-1][x-1]==0);
+}
+
+int cangoRight(int x, int y) {
+	return (y<room_size && ver[x-1][y-1]==0);
+}
 
 int main() {
 	FILE *fp = fopen("input.txt", "r");
@@ -57,6 +66,10 @@ int main() {
 		}
 		printf("\n");
 	}
+
+	printf("%d\n", cangoLeft(2, 2));
+	printf("%d\n", cangoLeft(2, 3));
+	printf("%d\n", cangoLeft(3, 2));
 
 	return 0;
 }
