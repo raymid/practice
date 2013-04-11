@@ -34,19 +34,19 @@ int cangoRight(int x, int y) {
 }
 
 void DFS(int fug_x, int fug_y, int dest_x, int dest_y, int cha_x, int cha_y) { // 현재 주인공, 추격자, 탈출구 위치를 인자로 받아서 시뮬레이션 하면서 최단경로를 찾는 함수
-	printf("(%d, %d) / (%d, %d) / %d\n", fug_x, fug_y, cha_x, cha_y, tmp_length);
+	
 	if(fug_x == cha_x && fug_y == cha_y) {
 		return;	
 	}
 
+//	printf("(%d, %d) / (%d, %d) / %d\n", fug_x, fug_y, cha_x, cha_y, tmp_length);
+
 	tmp_length++;
 	visited[fug_x][fug_y] = tmp_length;
 
-//	printf("(%d, %d)\n", x, y);
 	if(fug_x==dest_x && fug_y==dest_y) {
-	//	printf("Exit Complete! : %d\n", tmp_length);
 		if (shortest_length > tmp_length) {
-			printf("shortest!\n");
+			//printf("shortest!\n");
 			int i, j;
 			shortest_length = tmp_length;
 			for(i=1; i<=room_size; i++) {
@@ -175,40 +175,43 @@ void print_path() {
 	}
 	return result;
 }*/
-
+/*
 void print_path2() {
 	int k;
-	int i, j, cur_x = -1, cur_y = -1;
+	int i, j, cur_fug_x = -1, cur_fug_y = -1;
+
+	int cur_cha_x = 
 
 	for(i = 1; i<=room_size; i++) {
 		for(j = 1; j<=room_size; j++) {
 			if(shortest_visited[i][j] == 1) {
-				cur_x = i;
-				cur_y = j;
+				cur_fug_x = i;
+				cur_fug_y = j;
 			}
-			if (cur_x != -1 || cur_y != -1) break;
+			if (cur_fug_x != -1 || cur_fug_y != -1) break;
 		}
-		if (cur_x != -1 || cur_y != -1) break;
+		if (cur_fug_x != -1 || cur_fug_y != -1) break;
 	}
 
 	for (k = 1; k<=shortest_length; k++) {
-		printf("(%d, %d)\n", cur_x, cur_y);
-		if(shortest_visited[cur_x+1][cur_y] == k+1) {
-			cur_x = cur_x+1;
+		printf("(%d, %d), (%d,%d)\n", cur_fug_x, cur_fug_y, cur_cha_x, cur_cha_y);
+		if(shortest_visited[cur_fug_x+1][cur_fug_y] == k+1) {
+			cur_fug_x = cur_fug_x+1;
+			chasing(cur_fug_x, cur_fug_y, );
 		}
-		else if(shortest_visited[cur_x-1][cur_y] == k+1) {
-			cur_x = cur_x-1;
+		else if(shortest_visited[cur_fug_x-1][cur_fug_y] == k+1) {
+			cur_fug_x = cur_fug_x-1;
 		}
-		else if(shortest_visited[cur_x][cur_y+1] == k+1) {
-			cur_y = cur_y+1;
+		else if(shortest_visited[cur_fug_x][cur_fug_y+1] == k+1) {
+			cur_fug_y = cur_fug_y+1;
 		}
-		else if(shortest_visited[cur_x][cur_y-1] == k+1) {
-			cur_y = cur_y-1;
+		else if(shortest_visited[cur_fug_x][cur_fug_y-1] == k+1) {
+			cur_fug_y = cur_fug_y-1;
 		}
 	}
 }
 
-
+*/
 
 int main() {
 	FILE *fp = fopen("input.txt", "r");
@@ -239,50 +242,52 @@ int main() {
 	}
 
 
-/*	for(i = 0; i < room_size; i++) {
-		for(j=0; j < room_size-1; j++) {
-			printf("%d", ver[i][j]);
-		}
-		printf("\n");
-	}
-
-
-	for(i = 0; i < room_size; i++) {
-		for(j=0; j < room_size-1; j++) {
-			printf("%d", hor[i][j]);
-		}
-		printf("\n");
-	}
-
-	printf("%d\n", cangoLeft(2, 2));
-	printf("%d\n", cangoLeft(2, 3));
-	printf("%d\n", cangoLeft(3, 2));*/
-
-/*	getShortestPath(fug_x, fug_y, ex_x, ex_y);
-	print_path2();
-	getShortestPath(1, 1, 3, 4);
-	print_path2();
-
-
-	for (i=1;i<=room_size;i++){
-		for (j=1;j<=room_size;j++){
-			printf("%d ", shortest_visited[i][j]);
-		}
-		puts("");
-	}
-	puts("");
-	printf("%d\n", shortest_length); */
-
 	getShortestPath(fug_x, fug_y, ex_x, ex_y, cha_x, cha_y);
-	printf("shortest length : %d\n", shortest_length);
-	for (i=1;i<=room_size;i++){
+	printf("Shortest Path Length : %d\n\n", (shortest_length-1));
+/*	for (i=1;i<=room_size;i++){
 		for (j=1;j<=room_size;j++){
 			printf("%d ", shortest_visited[i][j]);
 		}
 		puts("");
 	}
-	puts("");
+	puts(""); */
 
+
+	
+	int k;
+	int q, w, cur_fug_x = -1, cur_fug_y = -1;
+
+	for(q = 1; q<=room_size; q++) {
+		for(w = 1; w<=room_size; w++) {
+			if(shortest_visited[q][w] == 1) {
+				cur_fug_x = q;
+				cur_fug_y = w;
+			}
+			if (cur_fug_x != -1 || cur_fug_y != -1) break;
+		}
+		if (cur_fug_x != -1 || cur_fug_y != -1) break;
+	}
+
+	printf("Path : \n");
+	for (k = 1; k<=shortest_length; k++) {
+		printf("(%d,%d) / (%d,%d)\n", cur_fug_x, cur_fug_y, cha_x, cha_y);
+		if(shortest_visited[cur_fug_x+1][cur_fug_y] == k+1) {
+			cur_fug_x = cur_fug_x+1;
+			chasing(cur_fug_x, cur_fug_y, &cha_x, &cha_y);
+		}
+		else if(shortest_visited[cur_fug_x-1][cur_fug_y] == k+1) {
+			cur_fug_x = cur_fug_x-1;
+			chasing(cur_fug_x, cur_fug_y, &cha_x, &cha_y);
+		}
+		else if(shortest_visited[cur_fug_x][cur_fug_y+1] == k+1) {
+			cur_fug_y = cur_fug_y+1;
+			chasing(cur_fug_x, cur_fug_y, &cha_x, &cha_y);
+		}
+		else if(shortest_visited[cur_fug_x][cur_fug_y-1] == k+1) {
+			cur_fug_y = cur_fug_y-1;
+			chasing(cur_fug_x, cur_fug_y, &cha_x, &cha_y);
+		}
+	}
 
 /*	while (1){
 		printf("fug : (%d,%d) // cha : (%d,%d)\n", cur_fug_x, cur_fug_y, cur_cha_x, cur_cha_y);
