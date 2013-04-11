@@ -33,15 +33,20 @@ int cangoRight(int x, int y) {
 	return (y<room_size && ver[x-1][y-1]==0);
 }
 
-void DFS(int x, int y, int dest_x, int dest_y) {
-	tmp_length++;
-	visited[x][y] = tmp_length;
+void DFS(int fug_x, int fug_y, int dest_x, int dest_y, int cha_x, int cha_y) { // 현재 주인공, 추격자, 탈출구 위치를 인자로 받아서 시뮬레이션 하면서 최단경로를 찾는 함수
+	printf("(%d, %d) / (%d, %d) / %d\n", fug_x, fug_y, cha_x, cha_y, tmp_length);
+	if(fug_x == cha_x && fug_y == cha_y) {
+		return;	
+	}
 
+	tmp_length++;
+	visited[fug_x][fug_y] = tmp_length;
 
 //	printf("(%d, %d)\n", x, y);
-	if(x==dest_x && y==dest_y) {
+	if(fug_x==dest_x && fug_y==dest_y) {
 	//	printf("Exit Complete! : %d\n", tmp_length);
 		if (shortest_length > tmp_length) {
+			printf("shortest!\n");
 			int i, j;
 			shortest_length = tmp_length;
 			for(i=1; i<=room_size; i++) {
@@ -53,25 +58,32 @@ void DFS(int x, int y, int dest_x, int dest_y) {
 		}
 	}
 	else {
-		if(cangoLeft(x,y) == 1 && visited[x][y-1]==0){
-			DFS(x, y-1, dest_x, dest_y);
+		if(cangoLeft(fug_x,fug_y) == 1 && visited[fug_x][fug_y-1]==0){
+			int tmp_cha_x = cha_x, tmp_cha_y = cha_y;
+			chasing(fug_x, fug_y-1, &tmp_cha_x, &tmp_cha_y);
+			DFS(fug_x, fug_y-1, dest_x, dest_y, tmp_cha_x, tmp_cha_y);
 		}
-
-		if(cangoRight(x,y) == 1 && visited[x][y+1]==0){
-			DFS(x, y+1, dest_x, dest_y);
+		if(cangoRight(fug_x,fug_y) == 1 && visited[fug_x][fug_y+1]==0){
+			int tmp_cha_x = cha_x, tmp_cha_y = cha_y;
+			chasing(fug_x, fug_y+1, &tmp_cha_x, &tmp_cha_y);
+			DFS(fug_x, fug_y+1, dest_x, dest_y, tmp_cha_x, tmp_cha_y);
 		}
-		if(cangoDown(x,y) == 1 && visited[x+1][y]==0){
-			DFS(x+1, y, dest_x, dest_y);
+		if(cangoDown(fug_x,fug_y) == 1 && visited[fug_x+1][fug_y]==0){
+			int tmp_cha_x = cha_x, tmp_cha_y = cha_y;
+			chasing(fug_x+1, fug_y, &tmp_cha_x, &tmp_cha_y);
+			DFS(fug_x+1, fug_y, dest_x, dest_y, tmp_cha_x, tmp_cha_y);
 		}
-		if(cangoUp(x,y) == 1 && visited[x-1][y]==0){
-			DFS(x-1, y, dest_x, dest_y);
+		if(cangoUp(fug_x,fug_y) == 1 && visited[fug_x-1][fug_y]==0){
+			int tmp_cha_x = cha_x, tmp_cha_y = cha_y;
+			chasing(fug_x-1, fug_y, &tmp_cha_x, &tmp_cha_y);
+			DFS(fug_x-1, fug_y, dest_x, dest_y, tmp_cha_x, tmp_cha_y);
 		}
 	}
-	visited[x][y] = 0;
+	visited[fug_x][fug_y] = 0;
 	tmp_length--;
 }
 
-void getShortestPath(int start_x, int start_y, int dest_x, int dest_y){
+void getShortestPath(int start_x, int start_y, int dest_x, int dest_y, int cha_x, int cha_y){
 	int i, j;
 	shortest_length = 1000000;
 	for (i=0;i<=room_size;i++){
@@ -79,54 +91,34 @@ void getShortestPath(int start_x, int start_y, int dest_x, int dest_y){
 			shortest_visited[i][j] = 0;
 		}
 	}
-	DFS(start_x, start_y, dest_x, dest_y);
+	DFS(start_x, start_y, dest_x, dest_y, cha_x, cha_y);
 }
 
-int chasing (int *fug_x, int *fug_y, int *cha_x, int *cha_y) {
-
-
-	getShortestPath(*fug_x, *fug_y, ex_x, ex_y);
-
-	prev_fug_x = *fug_x;
-	prev_fug_y = *fug_y;
-
-	if(shortest_visited[*fug_x + 1][*fug_y] == 2) {
-		*fug_x = *fug_x + 1;
-	}
-	else if(shortest_visited[*fug_x - 1][*fug_y] == 2) {
-		*fug_x = *fug_x - 1;
-	}
-	else if(shortest_visited[*fug_x][*fug_y + 1] == 2) {
-		*fug_y = *fug_y + 1;
-		}
-	else if(shortest_visited[*fug_x][*fug_y - 1] == 2) {
-		*fug_y = *fug_y - 1;
-	}
-
+int chasing (int fug_x, int fug_y, int *cha_x, int *cha_y) { // 주인공 한턴 움직인 후(시뮬레이션)의 위치쌍과 추격자의 현재 위치쌍을 받아서, 추격자가 이동해야할 실제 좌표로 변경해주는 함수
 	int k;
 	int is_ing=0;
 	for (k=0; k<2; k++) {
 
 		// 추격자와 도망자의 세로축이 다른 경우...
-		if(*cha_y > *fug_y) {
+		if(*cha_y > fug_y) {
 			if(cangoLeft(*cha_x, *cha_y)) {
 				*cha_y = *cha_y - 1;
 			}
 		}
-		else if (*cha_y < *fug_y) {
+		else if (*cha_y < fug_y) {
 			if(cangoRight(*cha_x, *cha_y)) {
 				*cha_y = *cha_y + 1;
 			}
 		}
 		// 추격자와 도망자의 세로축이 같고, 세로좌표가 다른 경우..
 		else { 
-			if(*cha_x > *fug_x) {
+			if(*cha_x > fug_x) {
 				if(cangoUp(*cha_x, *cha_y)) {
 					*cha_x = *cha_x - 1;
 				}
 
 			}
-			else if (*cha_x < *fug_x) {
+			else if (*cha_x < fug_x) {
 				if(cangoDown(*cha_x, *cha_y)) {
 					*cha_x = *cha_x + 1;
 				}
@@ -136,12 +128,12 @@ int chasing (int *fug_x, int *fug_y, int *cha_x, int *cha_y) {
 
 		prev_cha_x = *cha_x;
 		prev_cha_y = *cha_y;
-		if((prev_cha_x == *fug_x && prev_fug_y == *cha_y) || (*cha_x == *fug_x && *cha_y == *fug_y))
+		if((prev_cha_x == fug_x && prev_fug_y == *cha_y) || (*cha_x == fug_x && *cha_y == fug_y))
 			is_ing = 2;
 	}
 
 
-	if((*fug_x == ex_x && *fug_y == ex_y) && (is_ing == 0)) {
+	if((fug_x == ex_x && fug_y == ex_y) && (is_ing == 0)) {
 		is_ing = 1;
 	}
 
@@ -179,7 +171,7 @@ void print_path() {
 			}
 			if (breakvar) break;
 		}
-		if (breakvar) break;
+		/if (breakvar) break;
 	}
 	return result;
 }*/
@@ -281,13 +273,18 @@ int main() {
 	puts("");
 	printf("%d\n", shortest_length); */
 
-	int cur_fug_x = fug_x;
-	int cur_fug_y = fug_y;
-	int cur_cha_x = cha_x;
-	int cur_cha_y = cha_y;
+	getShortestPath(fug_x, fug_y, ex_x, ex_y, cha_x, cha_y);
+	printf("shortest length : %d\n", shortest_length);
+	for (i=1;i<=room_size;i++){
+		for (j=1;j<=room_size;j++){
+			printf("%d ", shortest_visited[i][j]);
+		}
+		puts("");
+	}
+	puts("");
 
 
-	while (1){
+/*	while (1){
 		printf("fug : (%d,%d) // cha : (%d,%d)\n", cur_fug_x, cur_fug_y, cur_cha_x, cur_cha_y);
 		int result = chasing (&cur_fug_x, &cur_fug_y, &cur_cha_x, &cur_cha_y);
 		if (result == 1){
@@ -297,7 +294,7 @@ int main() {
 			printf("fail\n");
 			break;
 		}
-	}
+	} */
 
 	return 0;
 }
